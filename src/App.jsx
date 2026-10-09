@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -63,6 +63,321 @@ const services = [
     text: "A coherent visual language that makes your business recognizable before anyone reads the name.",
   },
 ];
+
+const ecosystemBranches = [
+  {
+    id: "strategy",
+    number: "01",
+    title: "STRATEGY",
+    description: "Understand the business, audience, and goals.",
+    color: "violet",
+    position: { x: 360, y: 170 },
+    topics: [
+      { title: "Research", position: { x: 100, y: 65 } },
+      { title: "Positioning", position: { x: 100, y: 135 } },
+      { title: "User journey", position: { x: 100, y: 205 } },
+      { title: "Conversion goals", position: { x: 100, y: 275 } },
+    ],
+  },
+  {
+    id: "design",
+    number: "02",
+    title: "DESIGN",
+    description: "Build a distinctive identity and user experience.",
+    color: "blue",
+    position: { x: 840, y: 170 },
+    topics: [
+      { title: "Visual identity", position: { x: 1100, y: 65 } },
+      { title: "UI / UX", position: { x: 1100, y: 135 } },
+      { title: "Motion design", position: { x: 1100, y: 205 } },
+      { title: "Brand consistency", position: { x: 1100, y: 275 } },
+    ],
+  },
+  {
+    id: "development",
+    number: "03",
+    title: "DEVELOPMENT",
+    description: "Turn the design into a fast, functional website.",
+    color: "blue",
+    position: { x: 360, y: 530 },
+    topics: [
+      { title: "Responsive layout", position: { x: 100, y: 425 } },
+      { title: "Performance", position: { x: 100, y: 495 } },
+      { title: "Interactions", position: { x: 100, y: 565 } },
+      { title: "Deployment", position: { x: 100, y: 635 } },
+    ],
+  },
+  {
+    id: "growth",
+    number: "04",
+    title: "GROWTH",
+    description: "Improve conversions, visibility, and performance.",
+    color: "violet",
+    position: { x: 840, y: 530 },
+    topics: [
+      { title: "SEO foundations", position: { x: 1100, y: 425 } },
+      { title: "Analytics", position: { x: 1100, y: 495 } },
+      { title: "Lead generation", position: { x: 1100, y: 565 } },
+      { title: "Optimization", position: { x: 1100, y: 635 } },
+    ],
+  },
+];
+
+function EcosystemSection() {
+  const sectionRef = useRef(null);
+  const hasInteracted = useRef(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeBranch, setActiveBranch] = useState(null);
+  const [activeTopic, setActiveTopic] = useState(null);
+  const [hoveredBranch, setHoveredBranch] = useState(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.18 }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (
+      !hasInteracted.current ||
+      !window.matchMedia("(max-width: 1120px)").matches
+    ) {
+      return undefined;
+    }
+
+    const refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 550);
+    return () => window.clearTimeout(refreshTimer);
+  }, [activeBranch]);
+
+  const selectedBranch = ecosystemBranches.find(
+    (branch) => branch.id === activeBranch
+  );
+  const selectedTopic = selectedBranch?.topics.find(
+    (topic) => topic.title === activeTopic
+  );
+  const highlightedBranch = hoveredBranch || activeBranch;
+
+  const resetDiagram = () => {
+    hasInteracted.current = true;
+    setActiveBranch(null);
+    setActiveTopic(null);
+    setHoveredBranch(null);
+  };
+
+  const rootPath = (branch) => {
+    const { x, y } = branch.position;
+    const direction = x < 600 ? 1 : -1;
+    const vertical = y < 350 ? 1 : -1;
+    return `M 600 350 C ${600 + direction * 75} 350, ${x - direction * 45} ${y + vertical * 15}, ${x} ${y}`;
+  };
+
+  const topicPath = (branch, topic) => {
+    const { x, y } = branch.position;
+    const topicX = topic.position.x;
+    const topicY = topic.position.y;
+    const direction = topicX < 600 ? -1 : 1;
+    const startX = x + direction * 124;
+    const endX = topicX - direction * 92;
+    return `M ${startX} ${y} C ${startX + direction * 65} ${y}, ${endX - direction * 45} ${topicY}, ${endX} ${topicY}`;
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      className={`ecosystem-section${isVisible ? " is-visible" : ""}`}
+      aria-labelledby="ecosystem-heading"
+    >
+      <div className="ecosystem-grid" aria-hidden="true" />
+      <div className="ecosystem-atmosphere" aria-hidden="true" />
+
+      <div className="ecosystem-content">
+        <div className="ecosystem-heading">
+          <p className="eyebrow">THE DIGITAL FIRST IMPRESSION</p>
+          <div className="ecosystem-title-row">
+            <h2 id="ecosystem-heading">
+              One idea. <span>Entire ecosystem.</span>
+            </h2>
+            <p className="ecosystem-invite">
+              <span className="invite-indicator" aria-hidden="true" />
+              EXPLORE OUR APPROACH
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={`ecosystem-stage${highlightedBranch ? ` branch-active-${highlightedBranch}` : ""}`}
+          role="group"
+          aria-label="Interactive diagram of the Web Craft Studio approach"
+        >
+          <svg
+            className="ecosystem-connections"
+            viewBox="0 0 1200 700"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="ecosystem-route" x1="0" x2="1" y1="1" y2="0">
+                <stop offset="0%" stopColor="#8050ff" />
+                <stop offset="100%" stopColor="#4387ff" />
+              </linearGradient>
+              <filter id="ecosystem-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            {ecosystemBranches.map((branch, branchIndex) => {
+              const isActive = highlightedBranch === branch.id;
+              return (
+                <g
+                  key={branch.id}
+                  className={`connection-branch connection-${branch.id}${isActive ? " is-active" : ""}`}
+                >
+                  <path
+                    className="connection-path connection-root"
+                    d={rootPath(branch)}
+                    style={{ "--draw-delay": `${0.55 + branchIndex * 0.14}s` }}
+                  />
+                  <path
+                    className="connection-path connection-pulse"
+                    d={rootPath(branch)}
+                    style={{ "--draw-delay": `${0.55 + branchIndex * 0.14}s` }}
+                  />
+                  {branch.topics.map((topic, topicIndex) => (
+                    <g key={topic.title}>
+                      <path
+                        className={`connection-path connection-topic${activeBranch === branch.id ? " is-revealed" : ""}`}
+                        d={topicPath(branch, topic)}
+                        style={{
+                          "--draw-delay": `${0.8 + branchIndex * 0.12 + topicIndex * 0.08}s`,
+                        }}
+                      />
+                      <path
+                        className="connection-path connection-pulse"
+                        d={topicPath(branch, topic)}
+                      />
+                    </g>
+                  ))}
+                </g>
+              );
+            })}
+          </svg>
+
+          <div className="ecosystem-core">
+            <span className="core-orbit" aria-hidden="true" />
+            <span className="core-kicker">THE STARTING POINT</span>
+            <strong>YOUR<br />BUSINESS</strong>
+            <span className="core-caption">Everything starts here.</span>
+            <span className="core-signal" aria-hidden="true" />
+          </div>
+
+          {ecosystemBranches.map((branch, branchIndex) => {
+            const isExpanded = activeBranch === branch.id;
+            return (
+              <div
+                className={`ecosystem-branch-group branch-${branch.id}${isExpanded ? " is-expanded" : ""}`}
+                key={branch.id}
+              >
+                <button
+                  className={`ecosystem-primary ecosystem-${branch.color}`}
+                  type="button"
+                  style={{
+                    "--node-x": `${(branch.position.x / 1200) * 100}%`,
+                    "--node-y": `${(branch.position.y / 700) * 100}%`,
+                    "--node-delay": `${0.8 + branchIndex * 0.16}s`,
+                  }}
+                  onMouseEnter={() => setHoveredBranch(branch.id)}
+                  onMouseLeave={() => setHoveredBranch(null)}
+                  onFocus={() => setHoveredBranch(branch.id)}
+                  onBlur={() => setHoveredBranch(null)}
+                  onClick={() => {
+                    hasInteracted.current = true;
+                    if (isExpanded) {
+                      setActiveBranch(null);
+                      setActiveTopic(null);
+                    } else {
+                      setActiveBranch(branch.id);
+                      setActiveTopic(null);
+                    }
+                  }}
+                  aria-expanded={isExpanded}
+                  aria-controls={`ecosystem-topics-${branch.id}`}
+                  aria-label={`${branch.title}: ${branch.description}`}
+                >
+                  <span className="primary-index">{branch.number} / PROCESS</span>
+                  <strong>{branch.title}</strong>
+                  <span className="primary-description">{branch.description}</span>
+                  <span className="primary-action" aria-hidden="true">
+                    {isExpanded ? "−" : "+"}
+                  </span>
+                </button>
+                <div
+                  className="ecosystem-topics"
+                  id={`ecosystem-topics-${branch.id}`}
+                  aria-hidden={!isExpanded}
+                >
+                  {branch.topics.map((topic, topicIndex) => (
+                    <button
+                      className={`ecosystem-topic${activeTopic === topic.title ? " is-selected" : ""}`}
+                      key={topic.title}
+                      type="button"
+                      style={{
+                        "--topic-x": `${(topic.position.x / 1200) * 100}%`,
+                        "--topic-y": `${(topic.position.y / 700) * 100}%`,
+                        "--topic-delay": `${topicIndex * 0.075}s`,
+                      }}
+                      onMouseEnter={() => setHoveredBranch(branch.id)}
+                      onMouseLeave={() => setHoveredBranch(null)}
+                      onClick={() => setActiveTopic(topic.title)}
+                      tabIndex={isExpanded ? 0 : -1}
+                      aria-pressed={activeTopic === topic.title}
+                    >
+                      <span className="topic-signal" aria-hidden="true" />
+                      {topic.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="ecosystem-footer">
+          <div className="ecosystem-context" aria-live="polite" aria-atomic="true">
+            <span className="context-kicker">
+              {selectedTopic ? "SELECTED CAPABILITY" : selectedBranch ? "OUR APPROACH" : "A CONNECTED PROCESS"}
+            </span>
+            <p>
+              {selectedTopic
+                ? `${selectedTopic.title} is part of our ${selectedBranch.title.toLowerCase()} foundation.`
+                : selectedBranch
+                  ? selectedBranch.description
+                  : "From the first question to measurable growth, every decision connects."}
+            </p>
+          </div>
+          <button className="ecosystem-reset" type="button" onClick={resetDiagram}>
+            <span aria-hidden="true">↺</span>
+            RESET DIAGRAM
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function App() {
   const appRef = useRef(null);
@@ -221,88 +536,6 @@ function App() {
           }
         );
       });
-
-      /* =====================================================
-         "WHAT A BAD WEBSITE COSTS" VISUAL
-      ===================================================== */
-
-      const ecosystem = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".ecosystem-section",
-          start: "top top",
-          end: "+=240%",
-          pin: true,
-          scrub: 1.8,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      ecosystem
-        .fromTo(
-          ".ecosystem-core",
-          {
-            scale: 0.3,
-            opacity: 0,
-          },
-          {
-            scale: 1,
-            opacity: 1,
-            duration: 1,
-          }
-        )
-        .fromTo(
-          ".orbit-item",
-          {
-            scale: 0,
-            opacity: 0,
-          },
-          {
-            scale: 1,
-            opacity: 1,
-            stagger: 0.18,
-            duration: 0.8,
-          },
-          "-=0.4"
-        )
-        .to(
-          ".orbit-ring",
-          {
-            rotation: 180,
-            scale: 1.15,
-            duration: 2,
-            ease: "none",
-          },
-          0
-        )
-        .to(
-          ".ecosystem-core",
-          {
-            scale: 1.35,
-            borderRadius: "12%",
-            duration: 1,
-          },
-          "+=0.4"
-        )
-        .to(
-          ".orbit-item",
-          {
-            x: (i) => (i % 2 === 0 ? -180 : 180),
-            y: (i) => (i % 3 === 0 ? -120 : 120),
-            opacity: 0,
-            duration: 1,
-          },
-          "-=0.8"
-        )
-        .to(
-          ".ecosystem-message",
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-          },
-          "-=0.3"
-        );
 
       /* =====================================================
          SOLUTION STATEMENT
@@ -770,50 +1003,7 @@ function App() {
           </div>
         </section>
 
-        {/* =================================================
-            ECOSYSTEM
-        ================================================= */}
-
-        <section className="ecosystem-section">
-          <div className="ecosystem-grid" />
-
-          <div className="ecosystem-content">
-            <p className="eyebrow">THE DIGITAL FIRST IMPRESSION</p>
-
-            <div className="ecosystem-stage">
-              <div className="orbit-ring ring-one" />
-              <div className="orbit-ring ring-two" />
-
-              <div className="orbit-item orbit-one">
-                <span>TRUST</span>
-              </div>
-
-              <div className="orbit-item orbit-two">
-                <span>CLARITY</span>
-              </div>
-
-              <div className="orbit-item orbit-three">
-                <span>DESIGN</span>
-              </div>
-
-              <div className="orbit-item orbit-four">
-                <span>SPEED</span>
-              </div>
-
-              <div className="ecosystem-core">
-                <span>YOUR<br />BUSINESS</span>
-              </div>
-            </div>
-
-            <div className="ecosystem-message">
-              <span className="accent-line" />
-              <p>
-                A website is not decoration.
-                <strong> It is part of your sales experience.</strong>
-              </p>
-            </div>
-          </div>
-        </section>
+        <EcosystemSection />
 
         {/* =================================================
             SOLUTION
